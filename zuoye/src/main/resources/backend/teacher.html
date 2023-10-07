@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="cn-ZH">
+
+<head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Teacher</title>
+</head>
+<style>
+    .head {
+        padding-left: 45%;
+    }
+
+    th {
+        width: 70px;
+        padding-right: 70px;
+        padding-top: 5px;
+        height: 20px;
+
+
+    }
+
+    #context_th {
+        padding-right: 500px;
+    }
+</style>
+
+<body>
+<div class="head">
+    <h2>当前审批申请</h2>
+</div>
+<br>
+<div class="mid">
+    <table id="table1">
+        <thead>
+        <tr>
+            <th id="name_th">名字</th>
+            <th id="upname_th">提交人</th>
+            <th id="context_th">内容</th>
+            <th id="statue_th">状态</th>
+            <th>通过</th>
+            <th id="id_th"></th>
+
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+
+</body>
+<script>
+    var url1 = '/teacher/list'; // 替换为你的后端API地址
+    fetch(url1, {
+        method: 'GET', // 使用POST方法
+        headers: {
+            'Content-Type': 'application/json' // 声明请求体为JSON格式
+        },
+
+    })
+        .then(response => response.json()) // 解析响应JSON
+        .then(data => {
+
+
+            var newData=JSON.stringify(data);
+            var start = 0;
+            var end = 0;
+            var sz = new Array();
+            var j = 0;
+            for (var i = 0; i < newData.length; i++) {
+                if (newData[i] == ':') {
+                    start = i;
+
+                }
+                else if (newData[i] == ',' || newData[i] == '}') {
+                    end = i;
+                    sz[j] = newData.substring(start + 1, end);
+                    j++;
+
+                }
+            };
+
+            var table = document.getElementById("table1");
+            var tbody = table.getElementsByTagName("tbody")[0];
+            var k=3;
+            for (var i = 0; i < ((sz.length-3)/7); i++) {
+
+                var row = tbody.insertRow(i);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3=row.insertCell(2)
+                var cell4=row.insertCell(3)
+                var cell5=row.insertCell(4)
+                var cell6=row.insertCell(5)
+
+
+                cell1.innerHTML =sz[k]
+                cell2.innerHTML =sz[k+3]
+                cell3.innerHTML=sz[k+1]
+
+                cell4.innerHTML=sz[k+2]
+                cell5.innerHTML="√"
+                cell5.setAttribute('class','up_th_th')
+                cell6.innerHTML=sz[k-1]
+                cell6.style.display='none'
+                cell6.setAttribute('class','id_th_th')
+                k=k+6
+
+            }
+
+// 获取所有的<th>元素
+            var thElements = document.querySelectorAll(".id_th_th");
+            var thElements1 = document.querySelectorAll(".up_th_th");
+
+            // 为每个<th>元素添加点击事件处理程序
+            thElements1.forEach(function(th, index) {
+                th.addEventListener("click", function() {
+                    //发送删除请求
+                    var idThValue = thElements[index].textContent;
+
+                    var urlDelete = '/teacher/update';
+                    const  params={id: idThValue}
+// 发送POST请求
+
+                    fetch(urlDelete, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json' // 声明请求体为JSON格式
+                        },
+                        body :JSON.stringify(params)
+                    })
+                        .then(response => response.json()) // 解析响应JSON
+                        .then(data => {
+
+
+
+                            console.log('后端响应:', data);
+
+                        })
+                        .catch(error => {
+                            console.error('请求错误:', error);
+                        });
+
+
+
+
+                });
+            });
+
+
+            console.log('后端响应:', data);
+
+        })
+        .catch(error => {
+            console.error('请求错误:', error);
+        });
+
+</script>
+</html>

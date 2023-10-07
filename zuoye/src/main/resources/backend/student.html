@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="cn-ZH">
+
+<head>
+    <link rel="icon" href="favicon.ico" type ="image/x-icon">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+</head>
+<style>
+    body {
+        background: linear-gradient(45deg, #12b4dd, #800404);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .mid {
+        height: 300px;
+        width: 500px;
+    }
+
+    h3 {
+        display: inline;
+    }
+    .update {
+        width: 500px;
+        height: 200px;
+        background-color: rgb(55, 173, 51);
+        margin-left: 5px;
+        margin-top: 5px;
+        position: absolute;
+
+        display: none
+    }
+</style>
+
+<body>
+<div class="head">
+</div>
+<div class="mid">
+    <h3>学号:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+    <h3>姓名:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+    <h3>出生日期:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+    <h3>家庭住址:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+    <h3>所在学院:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+    <h3>入学日期:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+    <h3>性别:</h3>
+    <h3 class="context"></h3>
+    <br><br>
+
+    <div class="end">
+        <a href="#" class="update_button">修改个人信息</a>
+        <a href="confirm.html">提交申请</a>
+    </div>
+    <div class="update">
+
+        <form>
+
+            <label >用户名：</label>
+            <br>
+            <input type="text" id="username" name="username" placeholder="请输入用户名">
+            <br>
+            <label for="password"> 密码 ： </label><br>
+            <input type="password" id="password" name="password">
+            <br>
+            <label for="confirm_password">确认密码：</label><br>
+            <input type="password" id="confirm_password" name="confirm_password">
+            <br>
+            <input type="submit" value="修改" id="updateEnd">
+            <input type="submit" value="退出" id="exit">
+        </form>
+    </div>
+</div>
+</body>
+<script>
+
+</script>
+<script>
+    var exit=document.querySelector("#exit")
+    exit.onclick = function () {
+        update.style.display = 'none';
+
+
+    }
+    //点击显示修改页面
+    var update_button = document.querySelector(".update_button")
+    var update = document.querySelector(".update")
+    update_button.onclick = function () {
+        update.style.display = 'block';
+
+
+    }
+    var updateEnd= document.querySelector("#updateEnd");
+    updateEnd.onclick = function () {
+        update.style.display = 'none';
+        //fetch
+//1.获取数据
+        var uesrname = document.querySelector("#username").value
+        var password = document.querySelector("#password").value
+        var jsonData = {
+            username: uesrname,
+            password: password
+        };
+
+        var jsonString = JSON.stringify(jsonData);
+
+// 定义后端服务器的URL
+
+        var urlUpdate = '/student/update';
+// 发送POST请求
+
+        fetch(urlUpdate, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json' // 声明请求体为JSON格式
+            },
+            body: jsonString // 将JSON字符串作为请求体发送
+        })
+            .then(response => response.json()) // 解析响应JSON
+            .then(data => {
+
+                console.log('后端响应:', data);
+
+            })
+            .catch(error => {
+                console.error('请求错误:', error);
+            });
+
+    }
+
+</script>
+<script>
+
+
+
+    function sleep(d){
+        for(var t = Date.now();Date.now() - t <= d;);
+    }
+
+    var test = document.getElementById('test')
+
+        // 定义后端服务器的URL
+        var url = '/student'; // 替换为你的后端API地址
+
+        // 发送POST请求
+
+    fetch(url, {
+        method: 'GET', // 使用POST方法
+        headers: {
+            'Content-Type': 'application/json' // 声明请求体为JSON格式
+        },
+         // 将JSON字符串作为请求体发送
+    })
+        .then(response => response.json()) // 解析响应JSON
+        .then(data => {
+            var newData=JSON.stringify(data);
+            // 数组
+            var start = 0;
+            var end = 0;
+            var sz = new Array();
+            var j = 0;
+            for (var i = 0; i < newData.length; i++) {
+                if (newData[i] == ':') {
+                    start = i;
+
+                }
+                else if (newData[i] == ',' || newData[i] == '}') {
+                    end = i;
+                    sz[j] = newData.substring(start + 1, end);
+                    j++;
+
+                }
+            };
+            var q = document.querySelectorAll(".context")
+            for (var i = 0; i < (sz.length-2); i++) {
+                //code，msg
+                q[i].innerHTML = sz[i+2]
+            }
+
+            console.log('后端响应:', data);
+
+        })
+        .catch(error => {
+            console.error('请求错误:', error);
+        });
+
+
+
+</script>
+
+</html>

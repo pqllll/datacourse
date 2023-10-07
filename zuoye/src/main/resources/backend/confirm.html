@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="cn-ZH">
+
+<head>
+    <link rel="icon" href="favicon.ico" type ="image/x-icon">
+    <meta charset="UTF-8">
+    <title>提交申请页面</title>
+</head>
+<style>
+    body {
+        background: linear-gradient(45deg, #f6f1f1, #e20e0e);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .head {
+        width: 700px;
+        height: 300px;
+    }
+
+    .mid {
+        width: 200px;
+
+    }
+
+
+
+    th {
+        width: 70px;
+        padding-right: 70px;
+        padding-top: 10px;
+
+    }
+
+    .up_confirm {
+        width: 34px;
+        background-color: rgb(255, 255, 255);
+    }
+    #id_th {
+        display: none;
+    }
+    #delete_th{
+        display: none;
+    }
+
+</style>
+
+<body>
+<div class="head">
+    <form>
+
+        <select class="confirmDate">
+            <option>请假条</option>
+            <option>奖学金申报</option>
+            <option>助学贷款申报</option>
+            <option>贫困生申请</option>
+        </select>
+    </form>
+    <textarea name="textarea" cols="50" rows="10" class="confirmText">文本内容</textarea>
+    <div type="submit" class="up_confirm">提交</div>
+
+    <br>
+    <h2>当前审批申请</h2>
+    <table id="table1">
+        <thead>
+        <tr>
+            <th id="name_th">名字</th>
+            <th id="statue_th">状态</th>
+            <th id="delete_th">撤回</th>
+            <th id="id_th">id</th>
+
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+</div>
+
+
+
+</body>
+<script>
+
+
+</script>
+<script>
+    var url1 = '/confirm/list'; // 替换为你的后端API地址
+    fetch(url1, {
+        method: 'GET', // 使用POST方法
+        headers: {
+            'Content-Type': 'application/json' // 声明请求体为JSON格式
+        },
+
+    })
+        .then(response => response.json()) // 解析响应JSON
+        .then(data => {
+
+
+            var newData=JSON.stringify(data);
+            var start = 0;
+            var end = 0;
+            var sz = new Array();
+            var j = 0;
+            for (var i = 0; i < newData.length; i++) {
+                if (newData[i] == ':') {
+                    start = i;
+
+                }
+                else if (newData[i] == ',' || newData[i] == '}') {
+                    end = i;
+                    sz[j] = newData.substring(start + 1, end);
+                    j++;
+
+                }
+            };
+
+            var table = document.getElementById("table1");
+            var tbody = table.getElementsByTagName("tbody")[0];
+            var k=3;
+            for (var i = 0; i < ((sz.length-3)/7); i++) {
+
+                var row = tbody.insertRow(i);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3=row.insertCell(2)
+                var cell4=row.insertCell(3)
+
+
+                cell1.innerHTML =sz[k]
+                cell2.innerHTML =sz[k+2]
+                cell3.innerHTML="撤回"
+                cell3.setAttribute('class','delete_th_th')
+                cell4.innerHTML=sz[k-1]
+                cell4.style.display='none'
+                cell4.setAttribute('class','id_th_th')
+               k=k+6
+
+            }
+
+// 获取所有的<th>元素
+            var thElements = document.querySelectorAll(".id_th_th");
+            var thElements1 = document.querySelectorAll(".delete_th_th");
+
+            // 为每个<th>元素添加点击事件处理程序
+            thElements1.forEach(function(th, index) {
+                th.addEventListener("click", function() {
+                   //发送删除请求
+                    var idThValue = thElements[index].textContent;
+
+                    var urlDelete = '/confirm/delete';
+                    const  params={id: idThValue}
+// 发送POST请求
+                    document.getElementById("table1").deleteRow(index);
+                    fetch(urlDelete, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json' // 声明请求体为JSON格式
+                        },
+body :JSON.stringify(params)
+                    })
+                        .then(response => response.json()) // 解析响应JSON
+                        .then(data => {
+
+                            alert("已提交")
+                            console.log('后端响应:', data);
+
+                        })
+                        .catch(error => {
+                            console.error('请求错误:', error);
+                        });
+
+
+
+
+                });
+            });
+
+
+            console.log('后端响应:', data);
+
+        })
+        .catch(error => {
+            console.error('请求错误:', error);
+        });
+
+</script>
+<script>
+    // 1.获取对象
+
+    var up_confirm = document.querySelector(".up_confirm")
+    //2.点击提交
+    up_confirm.onclick = function () {
+        var confirmDate = document.querySelector(".confirmDate").value;
+        var confirmText = document.querySelector(".confirmText").value;
+        // 创建一个包含JSON数据的对象
+        var jsonData = {
+            name: confirmDate,
+            context: confirmText
+        };
+        // 将JSON对象转换为JSON字符串
+        var jsonString = JSON.stringify(jsonData);
+
+        // 定义后端服务器的URL
+        var url = '/confirm/add'; // 替换为你的后端API地址
+
+        // 发送POST请求
+
+        fetch(url, {
+            method: 'POST', // 使用POST方法
+            headers: {
+                'Content-Type': 'application/json' // 声明请求体为JSON格式
+            },
+            body: jsonString // 将JSON字符串作为请求体发送
+        })
+            .then(response => response.json()) // 解析响应JSON
+            .then(data => {
+
+                console.log('后端响应:', data);
+
+            })
+            .catch(error => {
+                console.error('请求错误:', error);
+            });
+    }
+
+</script>
+
+
+
+</html>
